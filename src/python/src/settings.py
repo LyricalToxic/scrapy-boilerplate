@@ -95,3 +95,6 @@ if IS_SENTRY_ENABLED:
 configure_logging()
 if datetime(*[int(number) for number in USER_AGENT_RELEASE_DATE.split('-')]) + timedelta(days=180) < datetime.now():
     logging.warning('USER_AGENT is outdated')
+
+RABBITMQ_EXAMPLE_TASKS = os.getenv("RABBITMQ_EXAMPLE_TASKS", "example_tasks")
+RABBITMQ_EXAMPLE_REPLIES = os.getenv("RABBITMQ_EXAMPLE_REPLIES", "example_replies")

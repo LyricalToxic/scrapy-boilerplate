@@ -65,18 +65,48 @@ class TaskObserver:
 
     def set_status(self, delivery_tag, status):
         try:
-            self.__tasks[delivery_tag].status = status
+            self.__tasks[delivery_tag].reply_data.status = status
         except KeyError:
             pass
 
     def set_exception(self, delivery_tag, exception):
         try:
-            self.__tasks[delivery_tag].exception = exception
+            self.__tasks[delivery_tag].reply_data.exception = exception
         except KeyError:
             pass
 
     def set_should_stop(self, delivery_tag, value):
         try:
             self.__tasks[delivery_tag].should_stop = value
+        except KeyError:
+            pass
+
+    def add_extra_data(self, delivery_tag, value):
+        try:
+            self.__tasks[delivery_tag].reply_data.update(value)
+        except KeyError:
+            pass
+
+    def delete_extra_data(self, delivery_tag, key):
+        try:
+            self.__tasks[delivery_tag].reply_data.delete(key)
+        except KeyError:
+            pass
+
+    def clear_extra_data(self, delivery_tag):
+        try:
+            self.__tasks[delivery_tag].reply_data.clear()
+        except KeyError:
+            pass
+
+    def set_code(self, delivery_tag, code):
+        try:
+            self.__tasks[delivery_tag].reply_data.code = code
+        except KeyError:
+            pass
+
+    def set_message(self, delivery_tag, message):
+        try:
+            self.__tasks[delivery_tag].reply_data.message = message
         except KeyError:
             pass

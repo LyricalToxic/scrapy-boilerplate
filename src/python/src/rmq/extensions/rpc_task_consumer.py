@@ -268,20 +268,20 @@ class RPCTaskConsumer(object):
             if self.completion_strategy == RPCTaskConsumer.CompletionStrategies.REQUESTS_BASED:
                 is_completed = current_task.is_requests_completed()
                 if is_completed:
-                    if current_task.status != TaskStatusCodes.ERROR:
+                    if current_task.reply_data.status != TaskStatusCodes.ERROR:
                         if (
                             current_task.success_responses == 0
                             and current_task.scheduled_requests > 0
                             and current_task.scheduled_requests == current_task.failed_responses
                         ):
-                            current_task.status = TaskStatusCodes.HARDWARE_ERROR
+                            current_task.reply_data.status = TaskStatusCodes.HARDWARE_ERROR
                         elif (
                             current_task.scheduled_requests > 0
                             and current_task.failed_responses == 0
                         ):
-                            current_task.status = TaskStatusCodes.SUCCESS
+                            current_task.reply_data.status = TaskStatusCodes.SUCCESS
                         else:
-                            current_task.status = TaskStatusCodes.PARTIAL_SUCCESS
+                            current_task.reply_data.status = TaskStatusCodes.PARTIAL_SUCCESS
             elif self.completion_strategy in [
                 RPCTaskConsumer.CompletionStrategies.STRONG_ITEMS_BASED,
                 RPCTaskConsumer.CompletionStrategies.WEAK_ITEMS_BASED,
@@ -299,28 +299,25 @@ class RPCTaskConsumer(object):
                         current_task.is_items_completed() and current_task.is_requests_completed()
                     )
                 if is_completed:
-                    if current_task.status != TaskStatusCodes.ERROR:
+                    if current_task.reply_data.status != TaskStatusCodes.ERROR:
                         if (
                             current_task.scraped_items == 0
                             and current_task.scheduled_items > 0
                             and current_task.scheduled_items == current_task.error_items
                         ):
-                            current_task.status = TaskStatusCodes.HARDWARE_ERROR
+                            current_task.reply_data.status = TaskStatusCodes.HARDWARE_ERROR
                         elif (
                             current_task.scheduled_items > 0
                             and (current_task.error_items + current_task.dropped_items) == 0
                         ):
-                            current_task.status = TaskStatusCodes.SUCCESS
+                            current_task.reply_data.status = TaskStatusCodes.SUCCESS
                         else:
-                            current_task.status = TaskStatusCodes.PARTIAL_SUCCESS
+                            current_task.reply_data.status = TaskStatusCodes.PARTIAL_SUCCESS
             if is_completed:
                 if current_task.reply_to is not None:
                     payload = {
-                        **deepcopy(current_task.payload),
-                        **{
-                            "status": current_task.status,
-                            "exception": current_task.exception,
-                        }
+                        "task_body": deepcopy(current_task.payload),
+                        "reply_data": current_task.reply_data.as_dict()
                     }
                     if isinstance(self.rmq_connection.connection, pika.SelectConnection):
                         cb = functools.partial(

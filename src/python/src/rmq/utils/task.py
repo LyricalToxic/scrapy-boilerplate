@@ -1,6 +1,7 @@
 import json
 
 from rmq.exceptions import ConsumedDataCorrupted
+from rmq.utils.reply_data import ReplyData
 
 
 class Task:
@@ -18,9 +19,7 @@ class Task:
         self.payload = json.loads(self.__consumed_data.get("body"))
         self.delivery_tag = self.__consumed_data.get("method").delivery_tag
         self.reply_to = self.__consumed_data.get("properties").reply_to
-        self.status = 1
-        self.exception = None
-
+        self.reply_data = ReplyData()
         self.__ack_callback = (
             ack_callback
             if ack_callback is not None and callable(ack_callback)
@@ -101,7 +100,7 @@ class Task:
                 "scheduled": self.scheduled_requests,
                 "total_responses": self.total_responses(),
                 "success_requests": self.success_responses,
-                "failed_reqiests": self.failed_responses,
+                "failed_requests": self.failed_responses,
                 "scheduled_items": self.scheduled_items,
                 "total_items": self.total_items(),
                 "success_items": self.scraped_items,
