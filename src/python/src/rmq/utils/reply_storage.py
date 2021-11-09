@@ -19,9 +19,9 @@ class StatusDescription(object):
 
 
 @dataclass(eq=False, order=False)
-class ReplyData(object):
-    status: StatusDescription = field(default_factory=StatusDescription)
-    code: Optional[int] = None
+class ReplyStorage(object):
+    status: int = StatusDescription()
+    http_code: Optional[int] = None
     exception: Optional[Exception] = None
     message: Optional[str] = None
     exc_message: Optional[str] = None

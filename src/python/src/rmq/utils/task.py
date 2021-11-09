@@ -1,10 +1,11 @@
 import json
+from copy import deepcopy
 
 from rmq.exceptions import ConsumedDataCorrupted
-from rmq.utils.reply_data import ReplyData
+from rmq.utils.reply_storage import ReplyStorage
 
 
-class Task:
+class Task(object):
     def __init__(self, consumed_data, ack_callback=None, nack_callback=None):
         if not isinstance(consumed_data, dict):
             raise ConsumedDataCorrupted("Consumed data is not a dict")
@@ -19,7 +20,7 @@ class Task:
         self.payload = json.loads(self.__consumed_data.get("body"))
         self.delivery_tag = self.__consumed_data.get("method").delivery_tag
         self.reply_to = self.__consumed_data.get("properties").reply_to
-        self.reply_data = ReplyData()
+        self.reply_storage = ReplyStorage()
         self.__ack_callback = (
             ack_callback
             if ack_callback is not None and callable(ack_callback)
@@ -93,6 +94,12 @@ class Task:
         if ignore_zero is True and self.scheduled_requests == 0:
             return False
         return self.scheduled_requests == (self.success_responses + self.failed_responses)
+
+    def as_message(self):
+        return {
+            "task_body": deepcopy(self.payload),
+            "reply_storage": self.reply_storage.as_dict()
+        }
 
     def __repr__(self):
         return json.dumps(
